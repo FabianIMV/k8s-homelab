@@ -1,0 +1,51 @@
+# Resource Quota - Limita recursos totales del namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: demo-quota
+  namespace: lab-demo
+spec:
+  hard:
+    # Límites de pods
+    pods: "10"
+    
+    # Límites de CPU
+    requests.cpu: "2"
+    limits.cpu: "4"
+    
+    # Límites de memoria
+    requests.memory: 2Gi
+    limits.memory: 4Gi
+    
+    # Límites de objetos
+    services: "5"
+    secrets: "10"
+    configmaps: "10"
+    persistentvolumeclaims: "5"
+
+---
+# LimitRange - Defaults y límites para containers
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: demo-limits
+  namespace: lab-demo
+spec:
+  limits:
+  - type: Container
+    # Defaults si no se especifica
+    default:
+      cpu: "200m"
+      memory: "128Mi"
+    # Defaults para requests
+    defaultRequest:
+      cpu: "100m"
+      memory: "64Mi"
+    # Máximo permitido
+    max:
+      cpu: "1"
+      memory: "512Mi"
+    # Mínimo requerido
+    min:
+      cpu: "50m"
+      memory: "32Mi"

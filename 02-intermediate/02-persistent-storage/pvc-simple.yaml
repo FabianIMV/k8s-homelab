@@ -1,0 +1,31 @@
+# PersistentVolumeClaim simple
+# En Docker Desktop, se usa hostpath por defecto
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # storageClassName: hostpath  # default en Docker Desktop
+
+---
+# Pod que usa el PVC
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-pvc
+spec:
+  containers:
+  - name: app
+    image: nginx:alpine
+    volumeMounts:
+    - name: my-storage
+      mountPath: /data
+  volumes:
+  - name: my-storage
+    persistentVolumeClaim:
+      claimName: my-pvc

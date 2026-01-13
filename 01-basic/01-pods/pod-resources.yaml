@@ -1,0 +1,23 @@
+# Pod con límites de recursos
+# Importante para production: evita que un pod consuma todos los recursos
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-resources
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    ports:
+    - containerPort: 80
+    resources:
+      # Requests: recursos garantizados (scheduler usa esto)
+      requests:
+        memory: "64Mi"
+        cpu: "100m"  # 100 milicores = 0.1 CPU
+      # Limits: máximo permitido (si excede, el pod es terminado/throttled)
+      limits:
+        memory: "128Mi"
+        cpu: "200m"

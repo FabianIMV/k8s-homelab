@@ -1,0 +1,28 @@
+# Pod simple con nginx
+# Un pod es la unidad mínima de despliegue en Kubernetes
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-simple
+  labels:
+    app: nginx
+    tier: frontend
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    ports:
+    - containerPort: 80
+    # Probes para healthcheck
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5

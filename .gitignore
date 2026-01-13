@@ -1,0 +1,32 @@
+# Archivos generados
+*.log
+*.tmp
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Secrets (NUNCA subir secrets reales)
+*-secret.yaml
+*.secret
+.env
+
+# Helm
+*.tgz
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes
+kubeconfig

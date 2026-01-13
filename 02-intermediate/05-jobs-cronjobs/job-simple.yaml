@@ -1,0 +1,15 @@
+# Job simple - se ejecuta una vez y termina
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ['sh', '-c', 'echo "Hello from Kubernetes Job!" && sleep 5 && echo "Done!"']
+      restartPolicy: Never
+  # Reintentos en caso de fallo
+  backoffLimit: 4

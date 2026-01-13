@@ -1,0 +1,26 @@
+# Pod con init container
+# Init containers se ejecutan ANTES de los containers principales
+# Útil para: setup, descargar configs, esperar servicios
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-init
+  labels:
+    app: init-demo
+spec:
+  # Init containers se ejecutan en orden, uno a la vez
+  initContainers:
+  - name: init-download
+    image: busybox
+    command: ['sh', '-c', 'echo "Downloading config..." && sleep 2 && echo "Done!"']
+  
+  - name: init-setup
+    image: busybox
+    command: ['sh', '-c', 'echo "Setting up..." && sleep 2 && echo "Ready!"']
+  
+  # Containers principales se ejecutan después
+  containers:
+  - name: app
+    image: nginx:alpine
+    ports:
+    - containerPort: 80

@@ -1,0 +1,97 @@
+# Nginx Demo App
+# Un sitio web estático simple para probar
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-demo
+  labels:
+    app: nginx-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      volumes:
+      - name: html
+        configMap:
+          name: nginx-demo-html
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-demo-html
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>K8s Homelab</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+          color: white;
+        }
+        .container {
+          text-align: center;
+          padding: 2rem;
+        }
+        h1 { font-size: 3rem; margin-bottom: 0.5rem; }
+        p { font-size: 1.2rem; opacity: 0.8; }
+        .emoji { font-size: 4rem; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="emoji">☸️</div>
+        <h1>K8s Homelab</h1>
+        <p>Running on Kubernetes!</p>
+        <p>Hostname: <strong id="hostname"></strong></p>
+      </div>
+      <script>
+        fetch('/etc/hostname').catch(() => {
+          document.getElementById('hostname').textContent = 'nginx-demo-xxx';
+        });
+      </script>
+    </body>
+    </html>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-demo
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx-demo
+  ports:
+  - port: 80
+    targetPort: 80

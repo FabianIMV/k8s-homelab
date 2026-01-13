@@ -1,0 +1,52 @@
+# Values para customizar kube-prometheus-stack
+# Usar con: helm upgrade --install monitoring prometheus-community/kube-prometheus-stack -f custom-values.yaml -n monitoring
+
+grafana:
+  adminPassword: admin
+  
+  # Habilitar persistencia
+  persistence:
+    enabled: true
+    size: 1Gi
+  
+  # Recursos
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+prometheus:
+  prometheusSpec:
+    # Retención de datos
+    retention: 7d
+    
+    # Storage
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+    
+    # Recursos
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi

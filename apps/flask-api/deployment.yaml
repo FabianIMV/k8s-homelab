@@ -1,0 +1,105 @@
+# Flask API Demo
+# Una API REST simple en Python
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-api
+  labels:
+    app: flask-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-api
+  template:
+    metadata:
+      labels:
+        app: flask-api
+    spec:
+      containers:
+      - name: flask
+        image: python:3.11-alpine
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          pip install flask && python /app/app.py
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: app-code
+          mountPath: /app
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: app-code
+        configMap:
+          name: flask-api-code
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flask-api-code
+data:
+  app.py: |
+    from flask import Flask, jsonify
+    import os
+    import socket
+    from datetime import datetime
+
+    app = Flask(__name__)
+
+    @app.route('/')
+    def index():
+        return jsonify({
+            "message": "Welcome to Flask API",
+            "hostname": socket.gethostname(),
+            "timestamp": datetime.now().isoformat()
+        })
+
+    @app.route('/health')
+    def health():
+        return jsonify({"status": "healthy"})
+
+    @app.route('/api/items')
+    def items():
+        return jsonify({
+            "items": [
+                {"id": 1, "name": "Item 1"},
+                {"id": 2, "name": "Item 2"},
+                {"id": 3, "name": "Item 3"}
+            ]
+        })
+
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=5000)
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-api
+spec:
+  selector:
+    app: flask-api
+  ports:
+  - port: 80
+    targetPort: 5000

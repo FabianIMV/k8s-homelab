@@ -1,0 +1,29 @@
+# Default values for my-webapp
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: alpine
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "100m"
+  limits:
+    memory: "128Mi"
+    cpu: "200m"
+
+# Enable ingress
+ingress:
+  enabled: false
+  host: webapp.local
+
+# Environment variables
+env:
+  APP_ENV: production
+  LOG_LEVEL: info

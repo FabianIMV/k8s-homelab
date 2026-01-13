@@ -1,0 +1,51 @@
+# Pod que usa ConfigMap y Secret
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-config
+spec:
+  containers:
+  - name: app
+    image: nginx:alpine
+    
+    # Variables de entorno desde ConfigMap
+    env:
+    - name: APP_ENV
+      valueFrom:
+        configMapKeyRef:
+          name: nginx-config
+          key: APP_ENV
+    
+    # Variables de entorno desde Secret
+    - name: DB_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: db-credentials
+          key: username
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: db-credentials
+          key: password
+    
+    # También puedes cargar todos los valores de un ConfigMap
+    envFrom:
+    - configMapRef:
+        name: nginx-config
+    
+    # Montar ConfigMap como archivo
+    volumeMounts:
+    - name: config-volume
+      mountPath: /etc/config
+      readOnly: true
+    - name: secret-volume
+      mountPath: /etc/secrets
+      readOnly: true
+  
+  volumes:
+  - name: config-volume
+    configMap:
+      name: nginx-config
+  - name: secret-volume
+    secret:
+      secretName: db-credentials

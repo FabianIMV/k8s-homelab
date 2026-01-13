@@ -1,0 +1,47 @@
+# ArgoCD Application
+# Este recurso le dice a ArgoCD qué desplegar y dónde
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: argocd
+spec:
+  project: default
+  
+  # Fuente: repositorio Git
+  source:
+    repoURL: https://github.com/argoproj/argocd-example-apps
+    targetRevision: HEAD
+    path: guestbook  # Directorio dentro del repo
+  
+  # Destino: cluster y namespace
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  
+  # Política de sync
+  syncPolicy:
+    # Auto-sync: sincronizar automáticamente cuando cambie el git
+    automated:
+      prune: true      # Eliminar recursos que ya no están en git
+      selfHeal: true   # Revertir cambios manuales
+    syncOptions:
+    - CreateNamespace=true
+
+---
+# App-of-Apps pattern
+# Una aplicación que despliega otras aplicaciones
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FabianIMV/k8s-homelab
+    targetRevision: HEAD
+    path: 03-advanced/02-argocd/apps  # Directorio con más Applications
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd

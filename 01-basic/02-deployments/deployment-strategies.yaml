@@ -1,0 +1,54 @@
+# Deployment con estrategia RollingUpdate (default)
+# Actualiza pods gradualmente, manteniendo disponibilidad
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rolling-update-demo
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: rolling-demo
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Máximo de pods extra durante update
+      maxSurge: 1
+      # Máximo de pods no disponibles durante update
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: rolling-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.24
+        ports:
+        - containerPort: 80
+
+---
+# Deployment con estrategia Recreate
+# Mata todos los pods antes de crear nuevos
+# Útil cuando no puedes tener dos versiones corriendo
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recreate-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: recreate-demo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: recreate-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.24
+        ports:
+        - containerPort: 80

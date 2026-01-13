@@ -1,0 +1,28 @@
+# ConfigMap - Para configuraciones no sensibles
+# Puede contener pares key-value o archivos completos
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  # Valores simples
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+  MAX_CONNECTIONS: "100"
+  
+  # Archivo de configuración completo
+  nginx.conf: |
+    server {
+      listen 80;
+      server_name localhost;
+      
+      location / {
+        root /usr/share/nginx/html;
+        index index.html;
+      }
+      
+      location /health {
+        return 200 'healthy';
+        add_header Content-Type text/plain;
+      }
+    }

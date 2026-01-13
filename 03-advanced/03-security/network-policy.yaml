@@ -1,0 +1,97 @@
+# Network Policies - control de tráfico de red
+# NOTA: Requiere un CNI que soporte NetworkPolicies (Calico, Weave, etc.)
+# Docker Desktop con Kubernetes básico NO soporta NetworkPolicies
+
+# Por defecto, todos los pods pueden comunicarse entre sí
+# Las NetworkPolicies son aditivas (whitelist)
+
+---
+# Denegar todo el tráfico entrante
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+  namespace: default
+spec:
+  podSelector: {}  # Aplica a todos los pods
+  policyTypes:
+  - Ingress
+  # Sin reglas de ingress = denegar todo
+
+---
+# Permitir tráfico solo desde pods con label específico
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: api
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8080
+
+---
+# Permitir tráfico desde namespace específico
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: api
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+
+---
+# Ejemplo completo: API server
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Permitir desde frontend en puerto 8080
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 8080
+  egress:
+  # Permitir a la base de datos
+  - to:
+    - podSelector:
+        matchLabels:
+          app: database
+    ports:
+    - port: 5432
+  # Permitir DNS
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - port: 53
+      protocol: UDP
